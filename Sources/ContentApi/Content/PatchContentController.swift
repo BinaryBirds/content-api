@@ -23,6 +23,7 @@ public extension PatchContentController {
     }
     
     func patch(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
+        try Model.PatchContent.validate(req)
         let patch = try req.content.decode(Model.PatchContent.self)
         return try self.find(req)
         .flatMap { model in

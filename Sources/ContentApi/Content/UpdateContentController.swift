@@ -23,6 +23,7 @@ public extension UpdateContentController {
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
+        try Model.UpdateContent.validate(req)
         let input = try req.content.decode(Model.UpdateContent.self)
         return try self.find(req)
         .flatMap { model in
