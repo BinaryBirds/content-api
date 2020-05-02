@@ -8,7 +8,6 @@ let package = Package(
     ],
     products: [
         .library(name: "ContentApi", targets: ["ContentApi"]),
-        .library(name: "ContentApiDynamic", type: .dynamic, targets: ["ContentApi"]),
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.5.0"),
