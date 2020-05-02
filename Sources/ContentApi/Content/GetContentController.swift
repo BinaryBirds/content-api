@@ -5,9 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 26..
 //
 
-import Vapor
-import Fluent
-
 public protocol GetContentController: IdentifiableContentController where Model: GetContentRepresentable {
     func get(_: Request) throws -> EventLoopFuture<Model.GetContent>
     func setupGetRoute(routes: RoutesBuilder)

@@ -11,7 +11,7 @@ let package = Package(
         .library(name: "ContentApiDynamic", type: .dynamic, targets: ["ContentApi"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.4.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.5.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc"),
     ],
     targets: [

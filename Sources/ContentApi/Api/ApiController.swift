@@ -5,9 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 22..
 //
 
-import Vapor
-import Fluent
-
 public protocol ApiController:
     ListContentController,
     GetContentController,

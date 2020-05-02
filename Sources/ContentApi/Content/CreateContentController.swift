@@ -5,9 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 26..
 //
 
-import Vapor
-import Fluent
-
 public protocol CreateContentController: ContentController where Model: CreateContentRepresentable {
 
     func beforeCreate(req: Request, model: Model, content: Model.CreateContent) -> EventLoopFuture<Model>

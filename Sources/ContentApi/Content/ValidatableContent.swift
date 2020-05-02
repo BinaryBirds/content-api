@@ -5,8 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 25..
 //
 
-import Vapor
-
 public protocol ValidatableContent: Content, Validatable {
     
 }

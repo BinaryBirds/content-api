@@ -5,9 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 26..
 //
 
-import Vapor
-import Fluent
-
 public protocol ListContentController: ContentController where Model: ListContentRepresentable {
     func list(_: Request) throws -> EventLoopFuture<Page<Model.ListItem>>
     func setupListRoute(routes: RoutesBuilder)

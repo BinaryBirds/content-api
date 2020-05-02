@@ -5,9 +5,6 @@
 //  Created by Tibor Bodecs on 2020. 04. 26..
 //
 
-import Vapor
-import Fluent
-
 public protocol PatchContentController: IdentifiableContentController where Model: PatchContentRepresentable {
     
     func beforePatch(req: Request, model: Model, content: Model.PatchContent) -> EventLoopFuture<Model>
