@@ -20,7 +20,7 @@ public extension CreateContentController {
     }
     
     func create(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
-        try Model.CreateContent.validate(req)
+        try Model.CreateContent.validate(content: req)
         let input = try req.content.decode(Model.CreateContent.self)
         let model = Model()
         return self.beforeCreate(req: req, model: model, content: input)
