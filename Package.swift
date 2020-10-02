@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
 
 let package = Package(
@@ -10,8 +10,8 @@ let package = Package(
         .library(name: "ContentApi", targets: ["ContentApi"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.5.0"),
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.30.0"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
     ],
     targets: [
         .target(name: "ContentApi", dependencies: [
