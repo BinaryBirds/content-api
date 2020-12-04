@@ -5,7 +5,7 @@
 //  Created by Tibor Bodecs on 2020. 04. 22..
 //
 
-public protocol ApiRepresentable: ListContentRepresentable,
+public protocol ApiContentRepresentable: ListContentRepresentable,
     // silence redundant conformance warning
     //GetContentRepresentable,
     CreateContentRepresentable,

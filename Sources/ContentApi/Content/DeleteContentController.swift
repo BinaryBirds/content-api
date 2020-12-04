@@ -8,9 +8,9 @@
 public protocol DeleteContentController: IdentifiableContentController where Model: DeleteContentRepresentable {
 
     func beforeDelete(req: Request, model: Model) -> EventLoopFuture<Model>
-    func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus>
+    func delete(_: Request) throws -> EventLoopFuture<HTTPStatus>
     func afterDelete(req: Request) -> EventLoopFuture<Void>
-    func setupDeleteRoute(routes: RoutesBuilder)
+    func setupDeleteRoute(on: RoutesBuilder)
 }
 
 public extension DeleteContentController {
@@ -20,10 +20,10 @@ public extension DeleteContentController {
     }
 
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        try self.find(req)
-            .flatMap { self.beforeDelete(req: req, model: $0) }
+        try find(req)
+            .flatMap { beforeDelete(req: req, model: $0) }
             .flatMap { $0.delete(on: req.db) }
-            .flatMap { self.afterDelete(req: req) }
+            .flatMap { afterDelete(req: req) }
             .transform(to: .ok)
     }
 
@@ -31,7 +31,7 @@ public extension DeleteContentController {
         req.eventLoop.future()
     }
     
-    func setupDeleteRoute(routes: RoutesBuilder) {
-        routes.delete(self.idPathComponent, use: self.delete)
+    func setupDeleteRoute(on builder: RoutesBuilder) {
+        builder.delete(idPathComponent, use: delete)
     }
 }

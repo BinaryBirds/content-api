@@ -7,16 +7,17 @@
 
 public protocol GetContentController: IdentifiableContentController where Model: GetContentRepresentable {
     func get(_: Request) throws -> EventLoopFuture<Model.GetContent>
-    func setupGetRoute(routes: RoutesBuilder)
+    func setupGetRoute(on: RoutesBuilder)
 }
 
 public extension GetContentController {
+
     func get(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
-        try self.find(req).map(\.getContent)
+        try find(req).map(\.getContent)
     }
 
-    func setupGetRoute(routes: RoutesBuilder) {
-        routes.get(self.idPathComponent, use: self.get)
+    func setupGetRoute(on builder: RoutesBuilder) {
+        builder.get(idPathComponent, use: get)
     }
 }
 

@@ -7,7 +7,7 @@
 
 public protocol ListContentController: ContentController where Model: ListContentRepresentable {
     func list(_: Request) throws -> EventLoopFuture<Page<Model.ListItem>>
-    func setupListRoute(routes: RoutesBuilder)
+    func setupListRoute(on: RoutesBuilder)
 }
 
 public extension ListContentController {
@@ -16,8 +16,8 @@ public extension ListContentController {
         Model.query(on: req.db).paginate(for: req).map { $0.map(\.listContent) }
     }
     
-    func setupListRoute(routes: RoutesBuilder) {
-        routes.get(use: self.list)
+    func setupListRoute(on builder: RoutesBuilder) {
+        builder.get(use: list)
     }
 
 }
