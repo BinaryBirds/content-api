@@ -7,6 +7,7 @@
 
 public protocol PatchContentController: IdentifiableContentController where Model: PatchContentRepresentable {
     
+    func accessPatch(req: Request) -> EventLoopFuture<Bool>
     func beforePatch(req: Request, model: Model, content: Model.PatchContent) -> EventLoopFuture<Model>
     func patch(_: Request) throws -> EventLoopFuture<Model.GetContent>
     func afterPatch(req: Request, model: Model) -> EventLoopFuture<Void>
@@ -15,24 +16,33 @@ public protocol PatchContentController: IdentifiableContentController where Mode
 
 public extension PatchContentController {
 
+    func accessPatch(req: Request) -> EventLoopFuture<Bool> {
+        req.eventLoop.future(true)
+    }
+
     func beforePatch(req: Request, model: Model, content: Model.PatchContent) -> EventLoopFuture<Model> {
         req.eventLoop.future(model)
     }
     
     func patch(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
-        try Model.PatchContent.validate(content: req)
-        let patch = try req.content.decode(Model.PatchContent.self)
-        return try find(req)
-            .flatMap { beforePatch(req: req, model: $0, content: patch) }
-            .flatMapThrowing { model -> Model in
-                try model.patch(patch)
-                return model
+        accessPatch(req: req).throwingFlatMap { hasAccess in
+            guard hasAccess else {
+                return req.eventLoop.future(error: Abort(.forbidden))
             }
-            .flatMap { model -> EventLoopFuture<Model.GetContent> in
-                return model.update(on: req.db)
-                    .flatMap { afterPatch(req: req, model: model) }
-                    .transform(to: model.getContent)
-            }
+            try Model.PatchContent.validate(content: req)
+            let patch = try req.content.decode(Model.PatchContent.self)
+            return try find(req)
+                .flatMap { beforePatch(req: req, model: $0, content: patch) }
+                .flatMapThrowing { model -> Model in
+                    try model.patch(patch)
+                    return model
+                }
+                .flatMap { model -> EventLoopFuture<Model.GetContent> in
+                    return model.update(on: req.db)
+                        .flatMap { afterPatch(req: req, model: model) }
+                        .transform(to: model.getContent)
+                }
+        }
     }
 
     func afterPatch(req: Request, model: Model) -> EventLoopFuture<Void> {

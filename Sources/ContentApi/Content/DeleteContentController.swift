@@ -7,6 +7,7 @@
 
 public protocol DeleteContentController: IdentifiableContentController where Model: DeleteContentRepresentable {
 
+    func accessDelete(req: Request) -> EventLoopFuture<Bool>
     func beforeDelete(req: Request, model: Model) -> EventLoopFuture<Model>
     func delete(_: Request) throws -> EventLoopFuture<HTTPStatus>
     func afterDelete(req: Request) -> EventLoopFuture<Void>
@@ -15,16 +16,25 @@ public protocol DeleteContentController: IdentifiableContentController where Mod
 
 public extension DeleteContentController {
 
+    func accessDelete(req: Request) -> EventLoopFuture<Bool> {
+        req.eventLoop.future(true)
+    }
+    
     func beforeDelete(req: Request, model: Model) -> EventLoopFuture<Model> {
         req.eventLoop.future(model)
     }
 
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        try find(req)
-            .flatMap { beforeDelete(req: req, model: $0) }
-            .flatMap { $0.delete(on: req.db) }
-            .flatMap { afterDelete(req: req) }
-            .transform(to: .ok)
+        accessDelete(req: req).throwingFlatMap { hasAccess in
+            guard hasAccess else {
+                return req.eventLoop.future(error: Abort(.forbidden))
+            }
+            return try find(req)
+                .flatMap { beforeDelete(req: req, model: $0) }
+                .flatMap { $0.delete(on: req.db) }
+                .flatMap { afterDelete(req: req) }
+                .transform(to: .ok)
+        }
     }
 
     func afterDelete(req: Request) -> EventLoopFuture<Void> {

@@ -6,14 +6,25 @@
 //
 
 public protocol GetContentController: IdentifiableContentController where Model: GetContentRepresentable {
+    
+    func accessGet(req: Request) -> EventLoopFuture<Bool>
     func get(_: Request) throws -> EventLoopFuture<Model.GetContent>
     func setupGetRoute(on: RoutesBuilder)
 }
 
 public extension GetContentController {
 
+    func accessGet(req: Request) -> EventLoopFuture<Bool> {
+        req.eventLoop.future(true)
+    }
+
     func get(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
-        try find(req).map(\.getContent)
+        accessGet(req: req).throwingFlatMap { hasAccess in
+            guard hasAccess else {
+                return req.eventLoop.future(error: Abort(.forbidden))
+            }
+            return try find(req).map(\.getContent)
+        }
     }
 
     func setupGetRoute(on builder: RoutesBuilder) {

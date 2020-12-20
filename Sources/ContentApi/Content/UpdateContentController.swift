@@ -7,6 +7,8 @@
 
 public protocol UpdateContentController: IdentifiableContentController where Model: UpdateContentRepresentable {
 
+    /// check if there is access to update the object, if the future the server will respond with a forbidden status
+    func accessUpdate(req: Request) -> EventLoopFuture<Bool>
     func beforeUpdate(req: Request, model: Model, content: Model.UpdateContent) -> EventLoopFuture<Model>
     func update(_: Request) throws -> EventLoopFuture<Model.GetContent>
     func afterUpdate(req: Request, model: Model) -> EventLoopFuture<Void>
@@ -15,24 +17,34 @@ public protocol UpdateContentController: IdentifiableContentController where Mod
 
 public extension UpdateContentController {
 
+    func accessUpdate(req: Request) -> EventLoopFuture<Bool> {
+        req.eventLoop.future(true)
+    }
+
     func beforeUpdate(req: Request, model: Model, content: Model.UpdateContent) -> EventLoopFuture<Model> {
         req.eventLoop.future(model)
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Model.GetContent> {
-        try Model.UpdateContent.validate(content: req)
-        let input = try req.content.decode(Model.UpdateContent.self)
-        return try find(req)
-            .flatMap { beforeUpdate(req: req, model: $0, content: input) }
-            .flatMapThrowing { model -> Model in
-                try model.update(input)
-                return model
+        accessUpdate(req: req).throwingFlatMap { hasAccess in
+            guard hasAccess else {
+                return req.eventLoop.future(error: Abort(.forbidden))
             }
-            .flatMap { model -> EventLoopFuture<Model.GetContent> in
-                return model.update(on: req.db)
-                    .flatMap { afterUpdate(req: req, model: model) }
-                    .transform(to: model.getContent)
-            }
+
+            try Model.UpdateContent.validate(content: req)
+            let input = try req.content.decode(Model.UpdateContent.self)
+            return try find(req)
+                .flatMap { beforeUpdate(req: req, model: $0, content: input) }
+                .flatMapThrowing { model -> Model in
+                    try model.update(input)
+                    return model
+                }
+                .flatMap { model -> EventLoopFuture<Model.GetContent> in
+                    return model.update(on: req.db)
+                        .flatMap { afterUpdate(req: req, model: model) }
+                        .transform(to: model.getContent)
+                }
+        }
     }
 
     func afterUpdate(req: Request, model: Model) -> EventLoopFuture<Void> {
