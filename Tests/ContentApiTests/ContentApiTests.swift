@@ -3,10 +3,6 @@ import XCTest
 
 final class ContentApiTests: XCTestCase {
     
-    static var allTests = [
-        ("testExample", testExample),
-    ]
-    
     func testExample() {
         XCTAssertTrue(true)   
     }
